@@ -6,7 +6,7 @@
 
 var app = require('../app');
 var debug = require('debug')('08-express-js:server');
-var http = require('http');
+var fs = require('fs');
 
 /**
  * Get port from environment and store in Express.
@@ -19,7 +19,7 @@ app.set('port', port);
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+var server = selectServer();
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -87,4 +87,28 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
+}
+
+/**
+ * Switch between http and https
+ */
+function selectServer() {
+  const options = {};
+  let http;
+  if (
+    process.env.LOCALHOST_SSL_CERT_PATH &&
+    process.env.LOCALHOST_SSL_KEY_PATH
+  ) {
+    // let's use https (or try)
+    console.log('Attempting to serve HTTPS...');
+    http = require('https');
+    options.key = fs.readFileSync(process.env.LOCALHOST_SSL_KEY_PATH);
+    options.cert = fs.readFileSync(process.env.LOCALHOST_SSL_CERT_PATH);
+  } else {
+    // let's fall back to http
+    console.log('Attempting to serve vanilla HTTP...');
+    http = require('http');
+  }
+  // null out options for http?
+  return http.createServer(options, app);
 }
