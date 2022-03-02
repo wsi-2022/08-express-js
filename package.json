@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "lint:node": "npx eslint -c config/.eslint.node.json app.js bin/www routes"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
